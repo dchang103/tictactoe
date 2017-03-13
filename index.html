@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Courier;
+        margin: 0;
+      }
+
+      #turnDisplay {
+        font-size: 32px;
+      }
+
+      #turnDisplay #X {
+        display: block;
+      }
+
+      #turnDisplay #O {
+        display: none;
+      }
+
+      #invalid {
+        visibility: hidden;
+      }
+
+      #gameEnd p{
+        font-size: 64px;
+        display: none;
+      }
+      
+      #boardDisplay td {
+        height: 80px;
+        width: 80px;
+        border: 1px solid black;
+        font-size: 64px;
+        text-align: center;
+      }
+
+      #footer {
+        position: absolute;
+        width: 50%;
+        bottom: 0px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- reference -->
+    <table id="legend">
+      <tr>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>5</td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>8</td>
+        <td>9</td>
+      </tr>
+    </table>
+
+    <!-- turn display -->
+    <div id="turnDisplay">
+      <p id="X">X's turn</p>
+      <p id="O">O's turn</p>
+    </div>
+
+    <!-- board display -->
+    <table id="boardDisplay">
+      <tr>
+        <td id="1"></td>
+        <td id="2"></td>
+        <td id="3"></td>
+      </tr>
+      <tr>
+        <td id="4"></td>
+        <td id="5"></td>
+        <td id="6"></td>
+      </tr>
+      <tr>
+        <td id="7"></td>
+        <td id="8"></td>
+        <td id="9"></td>
+      </tr>
+    </table>
+
+    <!-- error display -->
+    <p id="invalid">Invalid Move</p>
+
+    <!-- winner display -->
+    <div id="gameEnd">
+      <p id="Xwins">X wins!</p>
+      <p id="Owins">O wins!</p>
+      <p id="draw">Draw...</p>
+    </div>
+
+    <!-- command line -->
+    <form id="footer">
+      <input id="move" type="text">
+      <input type="submit" style="visibility: hidden">
+    </form>
+
+    <script>
+      document.getElementById('move').focus()
+
+      var board = {};
+      var turn = 'X';
+
+      var checkWinner = function() {
+        var rowWin1 = (board[1] === turn && board[2] === turn && board[3] === turn)
+        var rowWin2 = (board[4] === turn && board[5] === turn && board[6] === turn)
+        var rowWin3 = (board[7] === turn && board[8] === turn && board[9] === turn)
+        var colWin1 = (board[1] === turn && board[4] === turn && board[7] === turn)
+        var colWin2 = (board[2] === turn && board[5] === turn && board[8] === turn)
+        var colWin3 = (board[3] === turn && board[6] === turn && board[9] === turn)
+        var diagWin1 = (board[1] === turn && board[5] === turn && board[9] === turn)
+        var diagWin2 = (board[3] === turn && board[5] === turn && board[7] === turn)
+
+        var foundWin = (rowWin1 || rowWin2 || rowWin3 || colWin1 || colWin2 || colWin3 || diagWin1 || diagWin2)
+        if (foundWin) {
+          var queryString = turn + 'wins';
+          document.getElementById(queryString).style.display = 'block'
+          endGame();
+        } else if (Object.keys(board).length >= 9) {
+          document.getElementById('draw').style.display = 'block'
+          endGame();
+        }
+      }
+
+      var endGame = function() {
+        document.getElementById('footer').style.display = 'none'
+      }
+
+      var progressTurn = function() {
+        var X = document.getElementById('X')
+        var O = document.getElementById('O')
+        console.log(O.style.display);
+        if (O.style.display === 'none' || O.style.display === '') {
+          X.style.display = 'none';
+          O.style.display = 'block';
+        } else {
+          X.style.display = 'block';
+          O.style.display = 'none';
+        }
+
+        turn = (turn === 'X') ? 'O' : 'X';
+      }
+
+      document.getElementById('footer').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        var move = document.getElementById('move').value;
+        document.getElementById('move').value = '';
+        
+        if (!document.getElementById(move) || document.getElementById(move).innerHTML) {
+          //invalid move
+          document.getElementById('invalid').style.visibility = 'visible';
+          return
+        } else {
+          //display move
+          document.getElementById(move).innerHTML = turn;
+          
+          //insert move into state
+          board[move] = turn;
+
+          //check for winner
+          checkWinner();
+
+          //progress turn
+          progressTurn();
+        }
+      });
+
+      document.getElementById('move').addEventListener('change', function(e) {
+        document.getElementById('invalid').style.visibility = 'hidden';
+      })
+    </script>
+  </body>
+</html>
